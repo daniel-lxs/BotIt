@@ -2,7 +2,7 @@
   "name": "botlt",
   "version": "0.0.1",
   "description": "A bot that scrapes posts from an specific subreddit and posts it on a kbin magazine.",
-  "main": "main.ts",
+  "main": "src/main.ts",
   "scripts": {
     "test": "ts-node main.ts"
   },
