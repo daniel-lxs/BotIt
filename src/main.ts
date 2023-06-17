@@ -1,14 +1,21 @@
 import * as cheerio from "cheerio";
 import axios from "axios";
+import * as fs from "fs";
+import * as yaml from "yaml";
 
 import { Post } from "./model/Post";
 
-async function scrapeSubreddit(postLimit: number, delay: number) {
+async function scrapeSubreddit() {
   try {
     const baseUrl = "https://old.reddit.com";
-    const subreddit = "worldnews";
-    const postListResponse = await axios.get(`${baseUrl}/r/${subreddit}`);
 
+    // Read the YAML configuration file
+    const configFile = fs.readFileSync("config.yml", "utf-8");
+    const config = yaml.parse(configFile);
+
+    const { subreddit, postLimit, delay } = config;
+
+    const postListResponse = await axios.get(`${baseUrl}/r/${subreddit}`);
     const $postList = cheerio.load(postListResponse.data);
 
     const posts: Post[] = [];
@@ -20,7 +27,7 @@ async function scrapeSubreddit(postLimit: number, delay: number) {
     for (let i = 0; i < elements.length && scrapedPosts < postLimit; i++) {
       const element = elements[i];
 
-      if ($postList(element).attr('data-outbound-expiration') === '0') {
+      if ($postList(element).attr("data-outbound-expiration") === "0") {
         continue; // Stickied post
       }
 
@@ -55,5 +62,5 @@ async function scrapeSubreddit(postLimit: number, delay: number) {
   }
 }
 
-// Call the function with the desired post limit (e.g., 5 posts) and delay (e.g., 5000 milliseconds)
-scrapeSubreddit(5, 5000);
+// Call the function
+scrapeSubreddit();
