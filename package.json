@@ -1,0 +1,32 @@
+{
+  "name": "botlt",
+  "version": "0.0.1",
+  "description": "A bot that scrapes posts from an specific subreddit and posts it on a kbin magazine.",
+  "main": "main.ts",
+  "scripts": {
+    "test": "ts-node main.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/driccio98/Botlt.git"
+  },
+  "keywords": [
+    "reddit",
+    "kbin",
+    "scraper"
+  ],
+  "author": "Daniel Riccio",
+  "license": "Unlicense",
+  "bugs": {
+    "url": "https://github.com/driccio98/Botlt/issues"
+  },
+  "homepage": "https://github.com/driccio98/Botlt#readme",
+  "dependencies": {
+    "axios": "^1.4.0",
+    "cheerio": "^1.0.0-rc.12"
+  },
+  "devDependencies": {
+    "@types/cheerio": "^0.22.31",
+    "ts-node": "^10.9.1"
+  }
+}
