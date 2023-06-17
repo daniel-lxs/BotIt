@@ -7,7 +7,6 @@ export function parseRawPosts(rawPosts: RawPost[]): Post[] {
       id: rawPost.data.id,
       title: rawPost.data.title,
       url: rawPost.data.url_overridden_by_dest,
-      posted: false,
     };
 
     if (rawPost.data.selftext.length) {

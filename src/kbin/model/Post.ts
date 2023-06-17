@@ -3,5 +3,4 @@ export interface Post {
   title: string;
   content?: string;
   url: string;
-  posted: boolean;
 }
