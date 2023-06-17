@@ -1,3 +1,8 @@
-subreddit: worldnews
-postLimit: 5
-delay: 5000
+reddit:
+  baseUrl: https://old.reddit.com
+  subreddit: worldnews
+  postFilter:
+    limit: 5
+    minUpvotes: 500
+    maxDownvotes: 500
+    minUpvoteRatio: 0.70
