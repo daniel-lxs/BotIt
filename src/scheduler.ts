@@ -46,9 +46,9 @@ async function runScheduler(): Promise<void> {
     job.start();
   } else {
     console.log(
-      '[Scheduler] Cron expression not provided. Please specify the --cron argument.'
+      '[Scheduler] Cron expression not provided. Running fetch once...'
     );
-    process.exit(1);
+    start(lemmyClient, config, jwt);
   }
 }
 
