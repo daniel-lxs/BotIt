@@ -1,6 +1,6 @@
 import { CreatePost, LemmyHttp } from 'lemmy-js-client';
 
-import { Post } from '../../kbin/model/Post';
+import { Post } from '../model/Post';
 
 export async function createPost(
   client: LemmyHttp,

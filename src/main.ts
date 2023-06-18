@@ -4,7 +4,7 @@ import { LemmyHttp } from 'lemmy-js-client';
 
 import { scrapeSubreddit } from './reddit/api/scrapeSubreddit';
 import { Config } from './model/Config';
-import { parseRawPosts } from './kbin/service/parseRawPosts';
+import { parseRawPosts } from './lemmy/service/parseRawPosts';
 import { getJwt } from './lemmy/api/getJwt';
 import { createPost } from './lemmy/api/createPost';
 import { getCommunityId } from './lemmy/api/getCommunityId';
