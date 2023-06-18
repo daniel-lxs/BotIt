@@ -8,7 +8,8 @@ export async function createPost(
   communityId: number,
   post: Post
 ): Promise<string> {
-  console.log('Posting');
+  console.log(`Posting ${post.url} (${post.title})...`)
+
   const postForm: CreatePost = {
     community_id: communityId,
     auth: jwt,
