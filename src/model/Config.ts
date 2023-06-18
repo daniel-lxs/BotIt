@@ -1,5 +1,6 @@
 export interface Config {
   reddit: RedditConfig;
+  lemmy: LemmyConfig;
 }
 
 export interface RedditConfig {
@@ -11,4 +12,9 @@ export interface RedditConfig {
     minUpvoteRatio?: number;
     limit?: number;
   };
+}
+
+export interface LemmyConfig {
+  baseUrl: string;
+  communityName: string;
 }
