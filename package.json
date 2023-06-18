@@ -22,7 +22,11 @@
   },
   "homepage": "https://github.com/driccio98/Botlt#readme",
   "dependencies": {
+    "@types/jsonwebtoken": "^9.0.2",
     "axios": "^1.4.0",
+    "dotenv": "^16.3.1",
+    "jsonwebtoken": "^9.0.0",
+    "lemmy-js-client": "^0.18.0-rc.1",
     "yaml": "^2.3.1"
   },
   "devDependencies": {

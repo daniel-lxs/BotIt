@@ -5,7 +5,7 @@ Botlt is a bot that scrapes posts from a specific subreddit on Reddit and posts 
 
 ## Prerequisites
 
-- Node.js (v12 or higher)
+- Node.js (v14 or higher)
 
 ## Installation
 

@@ -10,6 +10,7 @@ export async function scrapeSubreddit({
   subreddit,
   postFilter,
 }: RedditConfig): Promise<RawPost[]> {
+  console.log('Getting posts');
   try {
     const response: AxiosResponse<RawSubreddit> = await axios.get(
       `${baseUrl}/r/${subreddit}.json`

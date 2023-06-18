@@ -6,3 +6,6 @@ reddit:
     minUpvotes: 500
     maxDownvotes: 500
     minUpvoteRatio: 0.70
+lemmy:
+  baseUrl: https://lemmy.world
+  communityName: botlt_test@kbin.social
