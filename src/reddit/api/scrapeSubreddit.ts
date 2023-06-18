@@ -10,7 +10,7 @@ export async function scrapeSubreddit({
   subreddit,
   postFilter,
 }: RedditConfig): Promise<RawPost[]> {
-  console.log('Getting posts');
+  console.log('Getting posts...');
   try {
     const response: AxiosResponse<RawSubreddit> = await axios.get(
       `${baseUrl}/r/${subreddit}.json`
@@ -36,23 +36,50 @@ function filterRawPosts(
   rawPosts: RawPost[],
   { minUpvotes, maxDownvotes, minUpvoteRatio }: PostFilter
 ) {
-  return rawPosts.filter((rawPost) => {
+  let stickiedOrRemoved = 0;
+  let notEnoughUpvotes = 0;
+  let tooManyDownVotes = 0;
+  let badUpvoteRatio = 0;
+
+  const filteredPosts = rawPosts.filter((rawPost) => {
     if (rawPost.data.stickied || rawPost.data.removal_reason) {
+      stickiedOrRemoved++;
       return false;
     }
-
+    
     if (minUpvotes && rawPost.data.ups < minUpvotes) {
+      notEnoughUpvotes++;
       return false;
     }
-
+    
     if (maxDownvotes && rawPost.data.downs > maxDownvotes) {
+      tooManyDownVotes++;
       return false;
     }
-
+    
     if (minUpvoteRatio && rawPost.data.upvote_ratio < minUpvoteRatio) {
+      badUpvoteRatio++;
       return false;
     }
 
     return true;
   });
+
+  if (filteredPosts.length > 0) {
+    console.log(`${filteredPosts.length} viable posts found:`)
+    filteredPosts.forEach(post => {
+      console.log(`* ${post.data.title}`);
+    })
+  } else {
+    console.log(`No valid posts found in the subreddit. Here is the breakdown:
+* ${stickiedOrRemoved} were stickied or removed
+* ${notEnoughUpvotes} didn't have enough upvotes (min: ${minUpvotes})
+* ${tooManyDownVotes} had too many downvotes (max: ${maxDownvotes})
+* ${badUpvoteRatio} had bad upvote ratios (min ratio: ${minUpvoteRatio})
+
+Please try again later or update the config.yml values to adjust your configurations (min upvotes, max downvotes, min ratio)
+`);
+  }
+
+  return filteredPosts;
 }
