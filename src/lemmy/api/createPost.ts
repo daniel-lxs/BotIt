@@ -18,13 +18,11 @@ export async function createPost(
       url: post.url,
     };
     const postResponse = await client.createPost(postForm);
-
-    console.log(JSON.stringify(postResponse));
-
-    if (!postResponse.post_view.post.url) {
+    //console.log(JSON.stringify(postResponse));
+    if (!postResponse.post_view.post.ap_id) {
       throw new Error('Could not post');
     }
-    return postResponse.post_view.post.url;
+    return postResponse.post_view.post.ap_id;
   } catch (error) {
     throw new Error(`An error ocurred while posting: ${error}`);
   }
