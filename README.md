@@ -49,7 +49,7 @@ Adjust the values in the `config.yml` file according to your requirements.
 To run the bot, use the following command:
 
 ```bash
-ts-node main.ts
+npm run start
 ```
 
 The bot will scrape posts from the specified subreddit on Reddit according to the configuration file and post them on a kbin magazine.

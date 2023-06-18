@@ -4,7 +4,7 @@
   "description": "A bot that scrapes posts from an specific subreddit and posts it on a kbin magazine.",
   "main": "src/main.ts",
   "scripts": {
-    "test": "ts-node main.ts"
+    "start": "ts-node src/main.ts"
   },
   "repository": {
     "type": "git",
