@@ -17,4 +17,5 @@ export interface RedditConfig {
 export interface LemmyConfig {
   baseUrl: string;
   communityName: string;
+  limit?: number
 }
