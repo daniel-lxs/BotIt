@@ -65,12 +65,7 @@ function filterRawPosts(
     return true;
   });
 
-  if (filteredPosts.length > 0) {
-    console.log(`${filteredPosts.length} viable posts found:`)
-    filteredPosts.forEach(post => {
-      console.log(`* ${post.data.title}`);
-    })
-  } else {
+  if (filteredPosts.length <= 0) {
     console.log(`No valid posts found in the subreddit. Here is the breakdown:
 * ${stickiedOrRemoved} were stickied or removed
 * ${notEnoughUpvotes} didn't have enough upvotes (min: ${minUpvotes})
