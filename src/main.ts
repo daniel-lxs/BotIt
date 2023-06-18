@@ -44,7 +44,7 @@ async function start() {
       config.lemmy.limit
     );
     const communityUrls = parseRawPostsToUrls(communityPosts);
-    
+
     const rawPosts = await scrapeSubreddit(config.reddit);
     const parsedPosts = parseRawPosts(rawPosts);
 
@@ -56,13 +56,15 @@ async function start() {
         newUrlFound = true;
         break;
       } else {
-        console.log(`Skipping already posted url: ${parsedPosts[i].url}`)
+        console.log(`Skipping already posted url: ${parsedPosts[i].url}`);
       }
       i++;
     }
 
     if (!newUrlFound) {
-      console.log(`There aren't any new posts from reddit to crosspost to kbin.`)
+      console.log(
+        `There aren't any new posts from reddit to crosspost to kbin.`
+      );
       return;
     }
 
