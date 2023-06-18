@@ -52,14 +52,14 @@ export async function start(
       return;
     }
 
-    /*const postUrl = await createPost(
+    const postUrl = await createPost(
       lemmyClient,
       await getJwt(lemmyClient, jwt),
       communityId,
       parsedPosts[i]
     );
 
-    console.log(`Succesfully posted to: ${postUrl}`);*/
+    console.log(`Succesfully posted to: ${postUrl}`);
   } catch (error) {
     console.error('Process terminated: ', error);
   }
