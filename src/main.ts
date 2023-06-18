@@ -1,5 +1,3 @@
-import * as fs from 'fs';
-import * as yaml from 'yaml';
 import { LemmyHttp } from 'lemmy-js-client';
 
 import { scrapeSubreddit } from './reddit/api/scrapeSubreddit';
@@ -11,26 +9,12 @@ import { getCommunityId } from './lemmy/api/getCommunityId';
 import { getCommunityPosts } from './lemmy/api/getCommunityPosts';
 import { parseRawPostsToUrls } from './lemmy/service/parseRawPostsToUrls';
 
-const dotenv = require('dotenv');
-dotenv.config();
-
-function getConfig(): Config {
+export async function start(
+  lemmyClient: LemmyHttp,
+  config: Config,
+  jwt: string
+) {
   try {
-    // Read the YAML configuration file
-    const configFile = fs.readFileSync('config.yml', 'utf-8');
-    return yaml.parse(configFile);
-  } catch (error) {
-    throw new Error(`Error reading the configuration file: ${error}`);
-  }
-}
-
-async function start() {
-  try {
-    const config = getConfig();
-
-    const lemmyClient = new LemmyHttp(config.lemmy.baseUrl);
-    let jwt = await getJwt(lemmyClient);
-
     const communityName = config.lemmy.communityName;
     const communityId = await getCommunityId(
       lemmyClient,
@@ -80,5 +64,3 @@ async function start() {
     console.error('Process terminated: ', error);
   }
 }
-
-start();
