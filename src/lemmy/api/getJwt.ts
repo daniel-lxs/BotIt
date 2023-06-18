@@ -6,7 +6,6 @@ export async function getJwt(
   client: LemmyHttp,
   currentJwt?: string
 ): Promise<string> {
-  console.log('Authenticating');
   if (!currentJwt || isJwtOutdated(currentJwt)) {
     const username = process.env.LEMMY_USER;
     const password = process.env.LEMMY_PASS;
