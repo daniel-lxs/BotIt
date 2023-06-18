@@ -1,7 +1,7 @@
 
 # Botlt
 
-Botlt is a bot that scrapes posts from a specific subreddit on Reddit and posts them on a kbin magazine. It is written in Node.js and utilizes the `axios` library for making HTTP requests and the `yaml` library for parsing the configuration file.
+Botlt is a Node.js application that scrapes posts from a specific subreddit on Reddit and posts them on a /kbin magazine or Lemmy community. It utilizes the `axios` library for making HTTP requests and the Lemmy JS client library for interacting with the Lemmy platform.
 
 ## Prerequisites
 
@@ -29,8 +29,9 @@ Botlt is a bot that scrapes posts from a specific subreddit on Reddit and posts 
 
 ## Configuration
 
-### Subreddit
-The bot uses a `config.yml` file to determine the subreddit to scrape and the criteria for selecting posts. Here is an example `config.yml` file:
+The bot uses a `config.yml` file to determine the subreddit to scrape and the criteria for selecting posts, as well as the Lemmy platform information. Adjust the values in the `config.yml` file according to your requirements.
+
+Example `config.yml` file:
 
 ```yaml
 reddit:
@@ -41,12 +42,15 @@ reddit:
     minUpvotes: 500
     maxDownvotes: 500
     minUpvoteRatio: 0.70
+    maxTimeHours: 4
+
+lemmy:
+  baseUrl: https://lemmy.world
+  communityName: botlt_test@kbin.social
 ```
 
-Adjust the values in the `config.yml` file according to your requirements.
+Additionally, set up the following environment variables by copying the provided `.env.template` file and renaming it to `.env`. Update the values in the `.env` file according to your Lemmy account:
 
-### Lemmy
-Set up your Lemmy bot's login by copy and pasting the provided `.env.template` file and renaming it to `.env`. Here's an explanation for each environment variable
 - `LEMMY_USER`: Username for your Lemmy account
 - `LEMMY_PASS`: Password for your Lemmy account
 

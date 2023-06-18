@@ -2,10 +2,11 @@ reddit:
   baseUrl: https://old.reddit.com
   subreddit: worldnews
   postFilter:
-    limit: 5
+    postLimit: 100
     minUpvotes: 500
     maxDownvotes: 500
     minUpvoteRatio: 0.70
+    maxTimeHours: 4
 lemmy:
   baseUrl: https://lemmy.world
   communityName: botlt_test@kbin.social

@@ -17,5 +17,6 @@ export interface RawPost {
     author: string;
     //For now
     media_embed: any;
+    created_utc: number;
   };
 }
