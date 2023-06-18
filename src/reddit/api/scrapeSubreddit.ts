@@ -14,7 +14,7 @@ export async function scrapeSubreddit({
   console.log('Getting posts...');
   try {
     const response: AxiosResponse<RawSubreddit> = await axios.get(
-      `${baseUrl}/r/${subreddit}.json`
+      `${baseUrl}/r/${subreddit}/hot.json`
     );
 
     let rawPosts = response.data.data.children.sort(
@@ -84,7 +84,8 @@ function filterRawPosts(
   if (filteredPosts.length > 0) {
     console.log(`${filteredPosts.length} viable posts found:`);
     filteredPosts.forEach((post) => {
-      console.log(`* ${post.data.url_overridden_by_dest} (${post.data.title})`);
+      console.log(`* ${post.data.url_overridden_by_dest} (${post.data.title})
+      -- ${post.data.ups} Upvotes ${post.data.downs} Downvotes`);
     });
   } else {
     console.log(`No valid posts found in the subreddit. Here is the breakdown:
