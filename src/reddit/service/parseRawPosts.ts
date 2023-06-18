@@ -1,5 +1,5 @@
-import { RawPost } from '../../reddit/model/RawPost';
-import { Post } from '../model/Post';
+import { Post } from '../../lemmy/model/Post';
+import { RawPost } from '../model/RawPost';
 
 export function parseRawPosts(rawPosts: RawPost[]): Post[] {
   const posts = rawPosts.map((rawPost) => {

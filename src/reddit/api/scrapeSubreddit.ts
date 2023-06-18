@@ -40,6 +40,7 @@ function filterRawPosts(
   let notEnoughUpvotes = 0;
   let tooManyDownVotes = 0;
   let badUpvoteRatio = 0;
+  let noLink = 0;
 
   const filteredPosts = rawPosts.filter((rawPost) => {
     if (rawPost.data.stickied || rawPost.data.removal_reason) {
@@ -62,17 +63,23 @@ function filterRawPosts(
       return false;
     }
 
+    if (!rawPost.data.url_overridden_by_dest) {
+      noLink++;
+      return false;
+    }
+
     return true;
   });
 
   if (filteredPosts.length > 0) {
     console.log(`${filteredPosts.length} viable posts found:`)
     filteredPosts.forEach(post => {
-      console.log(`* ${post.data.title}`);
+      console.log(`* ${post.data.url_overridden_by_dest} (${post.data.title})`);
     })
   } else {
     console.log(`No valid posts found in the subreddit. Here is the breakdown:
 * ${stickiedOrRemoved} were stickied or removed
+* ${noLink} had no link
 * ${notEnoughUpvotes} didn't have enough upvotes (min: ${minUpvotes})
 * ${tooManyDownVotes} had too many downvotes (max: ${maxDownvotes})
 * ${badUpvoteRatio} had bad upvote ratios (min ratio: ${minUpvoteRatio})
