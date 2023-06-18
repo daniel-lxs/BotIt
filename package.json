@@ -1,35 +1,35 @@
 {
-    "name": "botlt",
-    "version": "0.0.1",
-    "description": "A bot that scrapes posts from an specific subreddit and posts it on a kbin magazine.",
-    "main": "src/main.ts",
-    "scripts": {
-        "start": "ts-node src/main.ts"
-    },
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/driccio98/Botlt.git"
-    },
-    "keywords": [
-        "reddit",
-        "kbin",
-        "scraper"
-    ],
-    "author": "Daniel Riccio",
-    "license": "Unlicense",
-    "bugs": {
-        "url": "https://github.com/driccio98/Botlt/issues"
-    },
-    "homepage": "https://github.com/driccio98/Botlt#readme",
-    "dependencies": {
-        "@types/jsonwebtoken": "^9.0.2",
-        "axios": "^1.4.0",
-        "dotenv": "^16.3.1",
-        "jsonwebtoken": "^9.0.0",
-        "lemmy-js-client": "^0.18.0-rc.1",
-        "yaml": "^2.3.1"
-    },
-    "devDependencies": {
-        "ts-node": "^10.9.1"
-    }
+  "name": "botlt",
+  "version": "0.0.1",
+  "description": "A bot that scrapes posts from an specific subreddit and posts it on a kbin magazine.",
+  "main": "src/main.ts",
+  "scripts": {
+    "start": "ts-node src/main.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/driccio98/Botlt.git"
+  },
+  "keywords": [
+    "reddit",
+    "kbin",
+    "scraper"
+  ],
+  "author": "Daniel Riccio",
+  "license": "Unlicense",
+  "bugs": {
+    "url": "https://github.com/driccio98/Botlt/issues"
+  },
+  "homepage": "https://github.com/driccio98/Botlt#readme",
+  "dependencies": {
+    "@types/jsonwebtoken": "^9.0.2",
+    "axios": "^1.4.0",
+    "dotenv": "^16.3.1",
+    "jsonwebtoken": "^9.0.0",
+    "lemmy-js-client": "^0.18.0-rc.1",
+    "yaml": "^2.3.1"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.1"
+  }
 }
