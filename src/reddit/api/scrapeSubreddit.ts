@@ -4,6 +4,7 @@ import { RawSubreddit } from '../model/RawSubreddit';
 import { RawPost } from '../model/RawPost';
 import { RedditConfig } from '../../model/Config';
 import { PostFilter } from '../model/PostFilter';
+import { isPostWithinTimeLimit } from '../service/isPostWithinTimeLimit';
 
 export async function scrapeSubreddit({
   baseUrl,
@@ -22,8 +23,8 @@ export async function scrapeSubreddit({
 
     rawPosts = filterRawPosts(rawPosts, postFilter);
 
-    if (postFilter.limit) {
-      rawPosts = rawPosts.slice(0, postFilter.limit);
+    if (postFilter.postLimit) {
+      rawPosts = rawPosts.slice(0, postFilter.postLimit);
     }
 
     return rawPosts;
@@ -34,12 +35,13 @@ export async function scrapeSubreddit({
 
 function filterRawPosts(
   rawPosts: RawPost[],
-  { minUpvotes, maxDownvotes, minUpvoteRatio }: PostFilter
+  { minUpvotes, maxDownvotes, minUpvoteRatio, maxTimeHours }: PostFilter
 ) {
   let stickiedOrRemoved = 0;
   let notEnoughUpvotes = 0;
   let tooManyDownVotes = 0;
   let badUpvoteRatio = 0;
+  let tooOld = 0;
   let noLink = 0;
 
   const filteredPosts = rawPosts.filter((rawPost) => {
@@ -47,23 +49,31 @@ function filterRawPosts(
       stickiedOrRemoved++;
       return false;
     }
-    
+
     if (minUpvotes && rawPost.data.ups < minUpvotes) {
       notEnoughUpvotes++;
       return false;
     }
-    
+
     if (maxDownvotes && rawPost.data.downs > maxDownvotes) {
       tooManyDownVotes++;
       return false;
     }
-    
+
     if (minUpvoteRatio && rawPost.data.upvote_ratio < minUpvoteRatio) {
       badUpvoteRatio++;
       return false;
     }
 
-    if (!rawPost.data.url_overridden_by_dest || rawPost.data.url_overridden_by_dest.includes('redd.it')) {
+    if (maxTimeHours && !isPostWithinTimeLimit(rawPost, maxTimeHours)) {
+      tooOld++;
+      return false;
+    }
+
+    if (
+      !rawPost.data.url_overridden_by_dest ||
+      rawPost.data.url_overridden_by_dest.includes('redd.it')
+    ) {
       noLink++;
       return false;
     }
@@ -72,14 +82,15 @@ function filterRawPosts(
   });
 
   if (filteredPosts.length > 0) {
-    console.log(`${filteredPosts.length} viable posts found:`)
-    filteredPosts.forEach(post => {
+    console.log(`${filteredPosts.length} viable posts found:`);
+    filteredPosts.forEach((post) => {
       console.log(`* ${post.data.url_overridden_by_dest} (${post.data.title})`);
-    })
+    });
   } else {
     console.log(`No valid posts found in the subreddit. Here is the breakdown:
 * ${stickiedOrRemoved} were stickied or removed
 * ${noLink} had no link
+* ${tooOld} were too old (max hours: ${maxTimeHours})
 * ${notEnoughUpvotes} didn't have enough upvotes (min: ${minUpvotes})
 * ${tooManyDownVotes} had too many downvotes (max: ${maxDownvotes})
 * ${badUpvoteRatio} had bad upvote ratios (min ratio: ${minUpvoteRatio})

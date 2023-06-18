@@ -8,21 +8,25 @@ export async function createPost(
   communityId: number,
   post: Post
 ): Promise<string> {
-  console.log(`Posting ${post.url} (${post.title})...`)
+  console.log(`Posting ${post.url} (${post.title})...`);
+  try {
+    const postForm: CreatePost = {
+      community_id: communityId,
+      auth: jwt,
+      name: post.title,
+      body: post.content,
+      url: post.url,
+    };
+    const postResponse = await client.createPost(postForm);
 
-  const postForm: CreatePost = {
-    community_id: communityId,
-    auth: jwt,
-    name: post.title,
-    body: post.content,
-    url: post.url,
-  };
-  const postResponse = await client.createPost(postForm);
+    console.log(JSON.stringify(postResponse));
 
-  console.log(JSON.stringify(postResponse));
-
-  if (!postResponse.post_view.post.url) {
-    throw new Error('Could not post');
+    if (!postResponse.post_view.post.url) {
+      throw new Error('Could not post');
+    }
+    return postResponse.post_view.post.url;
+  } catch (error) {
+    throw new Error(`An error ocurred while posting: ${error}`);
   }
-  return postResponse.post_view.post.url;
+
 }
