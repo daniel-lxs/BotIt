@@ -41,13 +41,7 @@ async function runScheduler(): Promise<void> {
       start: false,
     });
 
-    console.log('[Scheduler] Running first fetch...');
-
-    // Run the start function once
-    await start(lemmyClient, config, jwt);
-
     console.log('[Scheduler] Scheduler started.');
-
     // Start the cron job
     job.start();
   } else {
