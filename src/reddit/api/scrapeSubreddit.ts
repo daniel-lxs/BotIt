@@ -63,7 +63,7 @@ function filterRawPosts(
       return false;
     }
 
-    if (!rawPost.data.url_overridden_by_dest) {
+    if (!rawPost.data.url_overridden_by_dest || rawPost.data.url_overridden_by_dest.includes('redd.it')) {
       noLink++;
       return false;
     }
