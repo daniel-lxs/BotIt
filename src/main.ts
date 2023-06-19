@@ -47,7 +47,7 @@ export async function start(
 
     if (!newUrlFound) {
       console.log(
-        `There aren't any new posts from reddit to crosspost to kbin.`
+        `There aren't any new posts from reddit to crosspost to ${communityName}.`
       );
       return;
     }
