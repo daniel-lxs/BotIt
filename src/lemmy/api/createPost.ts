@@ -6,16 +6,19 @@ export async function createPost(
   client: LemmyHttp,
   jwt: string,
   communityId: number,
-  post: Post
-): Promise<string> {
-  console.log(`Posting ${post.url} (${post.title})...`);
+  { title, content, url }: Post
+): Promise<string | void> {
+  console.log(`Posting ${url} (${title})...`);
   try {
+    if (title.length > 200) {
+      title = title.slice(0, 197) + '...';
+    }
     const postForm: CreatePost = {
       community_id: communityId,
       auth: jwt,
-      name: post.title,
-      body: post.content,
-      url: post.url,
+      name: title,
+      body: content,
+      url: url,
     };
     const postResponse = await client.createPost(postForm);
     //console.log(JSON.stringify(postResponse));
@@ -24,7 +27,10 @@ export async function createPost(
     }
     return postResponse.post_view.post.ap_id;
   } catch (error) {
-    throw new Error(`An error ocurred while posting: ${error}`);
+    console.error(
+      'An error occurred during the post creation process. It is uncertain whether the post was successfully created.',
+      error
+    );
+    return;
   }
-
 }
