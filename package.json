@@ -1,7 +1,7 @@
 {
   "name": "botlt",
   "version": "0.0.1",
-  "description": "A bot that scrapes posts from an specific subreddit and posts it on a kbin magazine.",
+  "description": "A bot that scrapes posts from an specific subreddit and posts it on a kbin magazine or Lemmy community.",
   "main": "src/main.ts",
   "scripts": {
     "start": "node dist/scheduler.js",
