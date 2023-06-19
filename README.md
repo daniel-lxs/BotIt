@@ -1,6 +1,6 @@
 # Botlt
 
-Botlt is a Node.js application that scrapes posts that contain external links from a specific subreddit on Reddit and posts them on a /kbin magazine or Lemmy community. It utilizes the `axios` library for making HTTP requests and the Lemmy JS client (`lemmy-js-client`) library for interacting with the Lemmy platform.
+Botlt is a Node.js application that scrapes posts that contain external links from a specific subreddit on Reddit and posts them on a /kbin magazine or Lemmy community. It will take into account the posts that already exist in the community and won't post duplicates. It utilizes the `axios` library for making HTTP requests and the Lemmy JS client (`lemmy-js-client`) library for interacting with the Lemmy platform.
 
 ## Prerequisites
 
@@ -60,7 +60,7 @@ To run the bot, use the following command:
 npm start
 ```
 
-The bot will scrape posts from the specified subreddit on Reddit according to the configuration file and post them on a kbin magazine.
+The bot will scrape posts from the specified subreddit on Reddit according to the configuration file and post them on a /kbin magazine or a Lemmy community.
 
 ## Development
 
@@ -73,7 +73,7 @@ This will use `ts-node` to directly run the TypeScript files.
 
 ## Scheduler
 
-To schedule the bot to run at specific intervals, you can use the `scheduler.js` file. Make sure you have provided the necessary cron expression as a command-line argument.
+To schedule the bot to run at specific intervals, you can use the cron argument `--cron`. Make sure you have provided the necessary cron expression as a command-line argument.
 
 To run the bot with the scheduler, use the following command:
 ```bash
