@@ -1,6 +1,7 @@
 import { PostFilter } from '../model/PostFilter';
 import { RawPost } from '../model/RawPost';
 import { isPostWithinTimeLimit } from './isPostWithinTimeLimit';
+import { logger, LogContext, LogDomain } from '../../logger';
 
 export function filterRawPosts(
   rawPosts: RawPost[],
@@ -51,13 +52,22 @@ export function filterRawPosts(
   });
 
   if (filteredPosts.length > 0) {
-    console.log(`${filteredPosts.length} viable posts found:`);
+    logger(
+      LogContext.Info,
+      `${filteredPosts.length} viable posts found:`,
+      LogDomain.Reddit
+    );
     filteredPosts.forEach((post) => {
-      console.log(`* ${post.data.url_overridden_by_dest} (${post.data.title})
-      -- ${post.data.ups} Upvotes ${post.data.downs} Downvotes`);
+      logger(
+        LogContext.Info,
+        `* ${post.data.url_overridden_by_dest} (${post.data.title}) -- ${post.data.ups} Upvotes ${post.data.downs} Downvotes`,
+        LogDomain.Reddit
+      );
     });
   } else {
-    console.log(`No valid posts found in the subreddit. Here is the breakdown:
+    logger(
+      LogContext.Info,
+      `No valid posts found in the subreddit. Here is the breakdown:
 * ${stickiedOrRemoved} were stickied or removed
 * ${noLink} had no link
 * ${tooOld} were too old (max hours: ${maxTimeHours})
@@ -65,8 +75,9 @@ export function filterRawPosts(
 * ${tooManyDownVotes} had too many downvotes (max: ${maxDownvotes})
 * ${badUpvoteRatio} had bad upvote ratios (min ratio: ${minUpvoteRatio})
 
-Please try again later or update the config.yml values to adjust your configurations (min upvotes, max downvotes, min ratio)
-`);
+Please try again later or update the config.yml values to adjust your configurations (min upvotes, max downvotes, min ratio)`,
+      LogDomain.Reddit
+    );
   }
 
   return filteredPosts;

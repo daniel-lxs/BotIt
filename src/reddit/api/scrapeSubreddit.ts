@@ -1,22 +1,28 @@
 import axios from 'axios';
+
 import { CommunityMapEntry } from '../../model/Config';
 import { CacheRepository } from '../repository/CacheRepository';
 import { RawPost } from '../model/RawPost';
 import { filterRawPosts } from '../service/filterRawPosts';
+import { logger, LogContext, LogDomain } from '../../logger';
 
 export async function scrapeSubreddit(
   baseUrl: string,
   { subreddit, postFilter }: CommunityMapEntry,
   cacheRepository: CacheRepository
 ): Promise<RawPost[]> {
-  console.log('Getting posts...');
+  logger(LogContext.Info, 'Getting posts...', LogDomain.Reddit);
 
   try {
     let rawPosts: RawPost[] = [];
     // Check if the subreddit is already in the cache
     const cachedData = await cacheRepository.getCache(subreddit, 10000);
     if (cachedData) {
-      console.log(`Using cached posts for subreddit: ${subreddit}`);
+      logger(
+        LogContext.Info,
+        `Using cached posts for subreddit: ${subreddit}`,
+        LogDomain.Reddit
+      );
       rawPosts = JSON.parse(cachedData);
     } else {
       const response = await axios.get(`${baseUrl}/r/${subreddit}/hot.json`);
@@ -38,6 +44,7 @@ export async function scrapeSubreddit(
 
     return rawPosts;
   } catch (error) {
+    logger(LogContext.Error, `Scraping failed: ${error}`, LogDomain.Reddit);
     throw new Error(`Scraping failed: ${error}`);
   }
 }

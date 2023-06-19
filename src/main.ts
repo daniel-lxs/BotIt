@@ -1,14 +1,15 @@
 import { LemmyHttp } from 'lemmy-js-client';
 
-import { scrapeSubreddit } from './reddit/api/scrapeSubreddit';
+import { scrapeSubreddit, CacheRepository, parseRawPosts } from './reddit';
 import { CommunityMapEntry, Config } from './model/Config';
-import { parseRawPosts } from './reddit/service/parseRawPosts';
-import { getJwt } from './lemmy/api/getJwt';
-import { createPost } from './lemmy/api/createPost';
-import { getCommunityId } from './lemmy/api/getCommunityId';
-import { getCommunityPosts } from './lemmy/api/getCommunityPosts';
-import { parseRawPostsToUrls } from './lemmy/service/parseRawPostsToUrls';
-import { CacheRepository } from './reddit/repository/CacheRepository';
+import {
+  getJwt,
+  createPost,
+  getCommunityId,
+  getCommunityPosts,
+  parseRawPostsToUrls,
+} from './lemmy';
+import { logger, LogContext } from './logger';
 
 export async function start(
   lemmyClient: LemmyHttp,
@@ -24,7 +25,7 @@ export async function start(
       const subreddit = communityEntry.subreddit;
       const communityName = communityEntry.community;
 
-      console.log(`Scraping posts from subreddit: ${subreddit}`);
+      logger(LogContext.Info, `Scraping posts from subreddit: ${subreddit}`);
       const rawPosts = await scrapeSubreddit(
         config.reddit.baseUrl,
         communityEntry,
@@ -56,19 +57,24 @@ export async function start(
       let newUrlFound = false;
       while (!newUrlFound && i < posts.length) {
         if (!communityUrls.includes(posts[i].url)) {
-          console.log(
+          logger(
+            LogContext.Info,
             `Found a reddit post from subreddit ${subreddit} to crosspost to ${communityName}!`
           );
           newUrlFound = true;
           break;
         } else {
-          console.log(`Skipping already posted url: ${posts[i].url}`);
+          logger(
+            LogContext.Info,
+            `Skipping already posted url: ${posts[i].url}`
+          );
         }
         i++;
       }
 
       if (!newUrlFound) {
-        console.log(
+        logger(
+          LogContext.Info,
           `There aren't any new posts from subreddit ${subreddit} to crosspost to ${communityName}.`
         );
         continue;
@@ -82,13 +88,16 @@ export async function start(
       );
 
       if (!postUrl) {
-        console.log('Post url unavailable');
+        logger(LogContext.Info, 'Post url unavailable');
         continue;
       }
 
-      console.log(`Successfully posted to ${communityName}: ${postUrl}`);
+      logger(
+        LogContext.Info,
+        `Successfully posted to ${communityName}: ${postUrl}`
+      );
     }
   } catch (error) {
-    console.error('Process terminated: ', error);
+    logger(LogContext.Error, 'Process terminated: ' + error);
   }
 }
