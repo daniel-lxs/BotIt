@@ -2,6 +2,8 @@
 
 Botlt is a Node.js application that scrapes posts that contain external links from a specific subreddit on Reddit and posts them on a /kbin magazine or Lemmy community. It will take into account the posts that already exist in the community and won't post duplicates. It utilizes the `axios` library for making HTTP requests and the Lemmy JS client (`lemmy-js-client`) library for interacting with the Lemmy platform.
 
+Note: You have to make sure the community you are posting on with this bot is federated or in other words exists on that instance, otherwise it won't be able to post to it. This is specially true for /kbin magazines, make sure the magazine exists on the Lemmy instance.
+
 ## Prerequisites
 
 - Node.js (v14 or higher)
