@@ -1,8 +1,13 @@
 import sqlite3 from 'sqlite3';
 import path from 'path';
+import { LogContext, LogDomain, logger } from '../../logger';
 
-const dbPath = path.resolve(__dirname, '../../data/cache.db');
-const db = new sqlite3.Database(dbPath);
+const dbPath = path.resolve(__dirname, '../data/cache.sqlite');
+const db = new sqlite3.Database(dbPath, (err) => {
+  if (err) {
+    logger(LogContext.Error, 'Error connecting to local db', LogDomain.Reddit);
+  }
+});
 
 export class CacheRepository {
   constructor() {
