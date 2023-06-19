@@ -7,6 +7,7 @@ import { start } from './main';
 import { Config } from './model/Config';
 import { LemmyHttp } from 'lemmy-js-client';
 import { getJwt } from './lemmy/api/getJwt';
+import { CacheRepository } from './reddit/repository/CacheRepository';
 
 const dotenv = require('dotenv');
 dotenv.config();
@@ -31,12 +32,14 @@ async function runScheduler(): Promise<void> {
   const lemmyClient = new LemmyHttp(config.lemmy.baseUrl);
   let jwt = await getJwt(lemmyClient);
 
+  const cacheRepository = new CacheRepository();
+
   if (cronExpression) {
     const job = new CronJob({
       cronTime: cronExpression,
       onTick: () => {
         console.log('[Scheduler] Running scheduled fetch...');
-        start(lemmyClient, config, jwt);
+        start(lemmyClient, config, jwt, cacheRepository);
       },
       start: false,
     });
@@ -48,7 +51,7 @@ async function runScheduler(): Promise<void> {
     console.log(
       '[Scheduler] Cron expression not provided. Running fetch once...'
     );
-    start(lemmyClient, config, jwt);
+    start(lemmyClient, config, jwt, cacheRepository);
   }
 }
 

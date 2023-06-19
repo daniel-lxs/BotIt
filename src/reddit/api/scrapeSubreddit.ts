@@ -1,104 +1,43 @@
-import axios, { AxiosResponse } from 'axios';
-
-import { RawSubreddit } from '../model/RawSubreddit';
+import axios from 'axios';
+import { CommunityMapEntry } from '../../model/Config';
+import { CacheRepository } from '../repository/CacheRepository';
 import { RawPost } from '../model/RawPost';
-import { RedditConfig } from '../../model/Config';
-import { PostFilter } from '../model/PostFilter';
-import { isPostWithinTimeLimit } from '../service/isPostWithinTimeLimit';
+import { filterRawPosts } from '../service/filterRawPosts';
 
-export async function scrapeSubreddit({
-  baseUrl,
-  subreddit,
-  postFilter,
-}: RedditConfig): Promise<RawPost[]> {
+export async function scrapeSubreddit(
+  baseUrl: string,
+  { subreddit, postFilter }: CommunityMapEntry,
+  cacheRepository: CacheRepository
+): Promise<RawPost[]> {
   console.log('Getting posts...');
+
   try {
-    const response: AxiosResponse<RawSubreddit> = await axios.get(
-      `${baseUrl}/r/${subreddit}/hot.json`
-    );
+    let rawPosts: RawPost[] = [];
+    // Check if the subreddit is already in the cache
+    const cachedData = await cacheRepository.getCache(subreddit, 10000);
+    if (cachedData) {
+      console.log(`Using cached posts for subreddit: ${subreddit}`);
+      rawPosts = JSON.parse(cachedData);
+    } else {
+      const response = await axios.get(`${baseUrl}/r/${subreddit}/hot.json`);
 
-    let rawPosts = response.data.data.children.sort(
-      (a, b) => b.data.ups - a.data.ups
-    );
+      rawPosts = response.data.data.children.sort(
+        (a: any, b: any) => b.data.ups - a.data.ups
+      );
+      // Save the response to cache
+      await cacheRepository.saveCache(subreddit, JSON.stringify(rawPosts));
+    }
 
-    rawPosts = filterRawPosts(rawPosts, postFilter);
+    if (postFilter) {
+      rawPosts = filterRawPosts(rawPosts, postFilter);
 
-    if (postFilter.postLimit) {
-      rawPosts = rawPosts.slice(0, postFilter.postLimit);
+      if (postFilter.postLimit) {
+        rawPosts = rawPosts.slice(0, postFilter.postLimit);
+      }
     }
 
     return rawPosts;
   } catch (error) {
     throw new Error(`Scraping failed: ${error}`);
   }
-}
-
-function filterRawPosts(
-  rawPosts: RawPost[],
-  { minUpvotes, maxDownvotes, minUpvoteRatio, maxTimeHours }: PostFilter
-) {
-  let stickiedOrRemoved = 0;
-  let notEnoughUpvotes = 0;
-  let tooManyDownVotes = 0;
-  let badUpvoteRatio = 0;
-  let tooOld = 0;
-  let noLink = 0;
-
-  const filteredPosts = rawPosts.filter((rawPost) => {
-    if (rawPost.data.stickied || rawPost.data.removal_reason) {
-      stickiedOrRemoved++;
-      return false;
-    }
-
-    if (minUpvotes && rawPost.data.ups < minUpvotes) {
-      notEnoughUpvotes++;
-      return false;
-    }
-
-    if (maxDownvotes && rawPost.data.downs > maxDownvotes) {
-      tooManyDownVotes++;
-      return false;
-    }
-
-    if (minUpvoteRatio && rawPost.data.upvote_ratio < minUpvoteRatio) {
-      badUpvoteRatio++;
-      return false;
-    }
-
-    if (maxTimeHours && !isPostWithinTimeLimit(rawPost, maxTimeHours)) {
-      tooOld++;
-      return false;
-    }
-
-    if (
-      !rawPost.data.url_overridden_by_dest ||
-      rawPost.data.url_overridden_by_dest.includes('redd.it')
-    ) {
-      noLink++;
-      return false;
-    }
-
-    return true;
-  });
-
-  if (filteredPosts.length > 0) {
-    console.log(`${filteredPosts.length} viable posts found:`);
-    filteredPosts.forEach((post) => {
-      console.log(`* ${post.data.url_overridden_by_dest} (${post.data.title})
-      -- ${post.data.ups} Upvotes ${post.data.downs} Downvotes`);
-    });
-  } else {
-    console.log(`No valid posts found in the subreddit. Here is the breakdown:
-* ${stickiedOrRemoved} were stickied or removed
-* ${noLink} had no link
-* ${tooOld} were too old (max hours: ${maxTimeHours})
-* ${notEnoughUpvotes} didn't have enough upvotes (min: ${minUpvotes})
-* ${tooManyDownVotes} had too many downvotes (max: ${maxDownvotes})
-* ${badUpvoteRatio} had bad upvote ratios (min ratio: ${minUpvoteRatio})
-
-Please try again later or update the config.yml values to adjust your configurations (min upvotes, max downvotes, min ratio)
-`);
-  }
-
-  return filteredPosts;
 }
