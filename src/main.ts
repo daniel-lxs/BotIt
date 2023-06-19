@@ -1,71 +1,103 @@
 import { LemmyHttp } from 'lemmy-js-client';
 
-import { scrapeSubreddit } from './reddit/api/scrapeSubreddit';
-import { Config } from './model/Config';
-import { parseRawPosts } from './reddit/service/parseRawPosts';
-import { getJwt } from './lemmy/api/getJwt';
-import { createPost } from './lemmy/api/createPost';
-import { getCommunityId } from './lemmy/api/getCommunityId';
-import { getCommunityPosts } from './lemmy/api/getCommunityPosts';
-import { parseRawPostsToUrls } from './lemmy/service/parseRawPostsToUrls';
+import { scrapeSubreddit, CacheRepository, parseRawPosts } from './reddit';
+import { CommunityMapEntry, Config } from './model/Config';
+import {
+  getJwt,
+  createPost,
+  getCommunityId,
+  getCommunityPosts,
+  parseRawPostsToUrls,
+} from './lemmy';
+import { logger, LogContext } from './logger';
 
 export async function start(
   lemmyClient: LemmyHttp,
   config: Config,
-  jwt: string
+  jwt: string,
+  cacheRepository: CacheRepository
 ) {
   try {
-    const communityName = config.lemmy.communityName;
-    const communityId = await getCommunityId(
-      lemmyClient,
-      await getJwt(lemmyClient, jwt),
-      communityName
-    );
-    const communityPosts = await getCommunityPosts(
-      lemmyClient,
-      await getJwt(lemmyClient, jwt),
-      communityId,
-      config.lemmy.limit
-    );
-    const communityUrls = parseRawPostsToUrls(communityPosts);
+    const communityMap: CommunityMapEntry[] = config.communityMap;
 
-    const rawPosts = await scrapeSubreddit(config.reddit);
-    const parsedPosts = parseRawPosts(rawPosts);
+    const subredditPromises = [];
+    for (const communityEntry of communityMap) {
+      const subreddit = communityEntry.subreddit;
+      const communityName = communityEntry.community;
 
-    let i = 0;
-    let newUrlFound = false;
-    while (!newUrlFound && i < parsedPosts.length) {
-      if (!communityUrls.includes(parsedPosts[i].url)) {
-        console.log('Found a reddit post to crosspost to kbin!');
-        newUrlFound = true;
-        break;
-      } else {
-        console.log(`Skipping already posted url: ${parsedPosts[i].url}`);
-      }
-      i++;
-    }
-
-    if (!newUrlFound) {
-      console.log(
-        `There aren't any new posts from reddit to crosspost to ${communityName}.`
+      logger(LogContext.Info, `Scraping posts from subreddit: ${subreddit}`);
+      const rawPosts = await scrapeSubreddit(
+        config.reddit.baseUrl,
+        communityEntry,
+        cacheRepository
       );
-      return;
+      const parsedPosts = parseRawPosts(rawPosts);
+
+      subredditPromises.push({ subreddit, communityName, posts: parsedPosts });
     }
 
-    const postUrl = await createPost(
-      lemmyClient,
-      await getJwt(lemmyClient, jwt),
-      communityId,
-      parsedPosts[i]
-    );
+    const communityDataList = await Promise.all(subredditPromises);
 
-    if (!postUrl) {
-      console.log('Post url unavailable');
-      return;
+    for (const communityData of communityDataList) {
+      const { subreddit, communityName, posts } = communityData;
+      const communityId = await getCommunityId(
+        lemmyClient,
+        await getJwt(lemmyClient, jwt),
+        communityName
+      );
+      const communityPosts = await getCommunityPosts(
+        lemmyClient,
+        await getJwt(lemmyClient, jwt),
+        communityId,
+        config.lemmy.postLimit
+      );
+      const communityUrls = parseRawPostsToUrls(communityPosts);
+
+      let i = 0;
+      let newUrlFound = false;
+      while (!newUrlFound && i < posts.length) {
+        if (!communityUrls.includes(posts[i].url)) {
+          logger(
+            LogContext.Info,
+            `Found a reddit post from subreddit ${subreddit} to crosspost to ${communityName}!`
+          );
+          newUrlFound = true;
+          break;
+        } else {
+          logger(
+            LogContext.Info,
+            `Skipping already posted url: ${posts[i].url}`
+          );
+        }
+        i++;
+      }
+
+      if (!newUrlFound) {
+        logger(
+          LogContext.Info,
+          `There aren't any new posts from subreddit ${subreddit} to crosspost to ${communityName}.`
+        );
+        continue;
+      }
+
+      const postUrl = await createPost(
+        lemmyClient,
+        await getJwt(lemmyClient, jwt),
+        communityId,
+        posts[i]
+      );
+
+      if (!postUrl) {
+        logger(LogContext.Info, 'Post url unavailable');
+        continue;
+      }
+
+      logger(
+        LogContext.Info,
+        `Successfully posted to ${communityName}: ${postUrl}`
+      );
     }
-    
-    console.log(`Succesfully posted to: ${postUrl}`);
   } catch (error) {
-    console.error('Process terminated: ', error);
+    logger(LogContext.Error, 'Process terminated: ' + error);
   }
 }

@@ -1,8 +1,6 @@
 # Botlt
 
-Botlt is a Node.js application that scrapes posts that contain external links from a specific subreddit on Reddit and posts them on a /kbin magazine or Lemmy community. It will take into account the posts that already exist in the community and won't post duplicates. It utilizes the `axios` library for making HTTP requests and the Lemmy JS client (`lemmy-js-client`) library for interacting with the Lemmy platform.
-
-Note: You have to make sure the community you are posting on with this bot is federated or in other words exists on that instance, otherwise it won't be able to post to it. This is specially true for /kbin magazines, make sure the magazine exists on the Lemmy instance.
+Botlt is a Node.js application that scrapes posts containing external links from specific subreddits on Reddit and posts them on either a /kbin magazine or a Lemmy community. It allows for handling multiple subreddits and communities, with individual filters for each.
 
 ## Prerequisites
 
@@ -11,39 +9,50 @@ Note: You have to make sure the community you are posting on with this bot is fe
 ## Installation
 
 1. Clone the repository:
-```bash
-git clone https://github.com/driccio98/Botlt.git
-```
+   ```bash
+   git clone https://github.com/driccio98/Botlt.git
+   ```
 
 2. Navigate to the project directory:
-```bash
-cd Botlt
-```
+   ```bash
+   cd Botlt
+   ```
 
 3. Install the dependencies:
-```bash
-npm install
-```
+   ```bash
+   npm install
+   ```
 
 ## Configuration
 
-The bot uses a `config.yml` file to determine the subreddit to scrape and the criteria for selecting posts, as well as the Lemmy platform information. Adjust the values in the `config.yml` file according to your requirements.
+The bot uses a `config.yml` file to determine the settings for scraping and posting. Adjust the values in the `config.yml` file according to your requirements.
 
 Example `config.yml` file:
 ```yaml
 reddit:
   baseUrl: https://old.reddit.com
-  subreddit: worldnews
-  postFilter:
-    limit: 5
-    minUpvotes: 500
-    maxDownvotes: 500
-    minUpvoteRatio: 0.70
-    maxTimeHours: 4
 
 lemmy:
   baseUrl: https://lemmy.world
-  communityName: botlt_test@kbin.social
+
+communityMap:
+  - subreddit: worldnews
+    postFilter:
+      postLimit: 75
+      minUpvotes: 800
+      maxDownvotes: 300
+      minUpvoteRatio: 0.75
+      maxTimeHours: 6
+    community: world@lemmy.world
+
+  - subreddit: worldnews
+    postFilter:
+      postLimit: 75
+      minUpvotes: 800
+      maxDownvotes: 300
+      minUpvoteRatio: 0.75
+      maxTimeHours: 5
+    community: worldnews@lemmy.ml
 ```
 
 Additionally, set up the following environment variables by copying the provided `.env.template` file and renaming it to `.env`. Update the values in the `.env` file according to your Lemmy account:
@@ -62,7 +71,7 @@ To run the bot, use the following command:
 npm start
 ```
 
-The bot will scrape posts from the specified subreddit on Reddit according to the configuration file and post them on a /kbin magazine or a Lemmy community.
+The bot will scrape posts from the specified subreddits on Reddit according to the configuration file and post them on the corresponding /kbin magazines or Lemmy communities.
 
 ## Development
 
@@ -91,4 +100,3 @@ Contributions are welcome! If you have any ideas, suggestions, or bug reports, p
 ## License
 
 This project is licensed under the [Unlicense](https://unlicense.org/).
-

@@ -7,6 +7,8 @@ import { start } from './main';
 import { Config } from './model/Config';
 import { LemmyHttp } from 'lemmy-js-client';
 import { getJwt } from './lemmy/api/getJwt';
+import { CacheRepository } from './reddit/repository/CacheRepository';
+import { logger, LogContext, LogDomain } from './logger';
 
 const dotenv = require('dotenv');
 dotenv.config();
@@ -17,6 +19,11 @@ function getConfig(): Config {
     const configFile = fs.readFileSync('config.yml', 'utf-8');
     return yaml.parse(configFile);
   } catch (error) {
+    logger(
+      LogContext.Error,
+      `Error reading the configuration file: ${error}`,
+      LogDomain.Scheduler
+    );
     throw new Error(`Error reading the configuration file: ${error}`);
   }
 }
@@ -31,27 +38,35 @@ async function runScheduler(): Promise<void> {
   const lemmyClient = new LemmyHttp(config.lemmy.baseUrl);
   let jwt = await getJwt(lemmyClient);
 
+  const cacheRepository = new CacheRepository();
+
   if (cronExpression) {
     const job = new CronJob({
       cronTime: cronExpression,
       onTick: () => {
-        console.log('[Scheduler] Running scheduled fetch...');
-        start(lemmyClient, config, jwt);
+        logger(
+          LogContext.Info,
+          'Running scheduled fetch...',
+          LogDomain.Scheduler
+        );
+        start(lemmyClient, config, jwt, cacheRepository);
       },
       start: false,
     });
 
-    console.log('[Scheduler] Scheduler started.');
+    logger(LogContext.Info, 'Scheduler started.', LogDomain.Scheduler);
     // Start the cron job
     job.start();
   } else {
-    console.log(
-      '[Scheduler] Cron expression not provided. Running fetch once...'
+    logger(
+      LogContext.Info,
+      'Cron expression not provided. Running fetch once...',
+      LogDomain.Scheduler
     );
-    start(lemmyClient, config, jwt);
+    start(lemmyClient, config, jwt, cacheRepository);
   }
 }
 
 runScheduler().catch((error) => {
-  console.error('An error occurred:', error);
+  logger(LogContext.Error, `An error occurred: ${error}`, LogDomain.Scheduler);
 });
