@@ -1,6 +1,6 @@
 # Botlt
 
-Botlt is a Node.js application that scrapes posts from a specific subreddit on Reddit and posts them on a /kbin magazine or Lemmy community. It utilizes the `axios` library for making HTTP requests and the Lemmy JS client library for interacting with the Lemmy platform.
+Botlt is a Node.js application that scrapes posts that contain external links from a specific subreddit on Reddit and posts them on a /kbin magazine or Lemmy community. It utilizes the `axios` library for making HTTP requests and the Lemmy JS client (`lemmy-js-client`) library for interacting with the Lemmy platform.
 
 ## Prerequisites
 
