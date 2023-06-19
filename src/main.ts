@@ -59,6 +59,11 @@ export async function start(
       parsedPosts[i]
     );
 
+    if (!postUrl) {
+      console.log('Post url unavailable');
+      return;
+    }
+    
     console.log(`Succesfully posted to: ${postUrl}`);
   } catch (error) {
     console.error('Process terminated: ', error);
