@@ -41,7 +41,10 @@ async function runScheduler(): Promise<void> {
   const lemmyClient = new LemmyHttp(config.lemmy.baseUrl);
   let jwt = await getJwt(lemmyClient);
 
-  const dbPath = path.resolve(__dirname, '../src/reddit/data/db.sqlite');
+  let dbPath = path.resolve(__dirname, '../dist/reddit/data/db.sqlite');
+  if (process.env.NODE_ENV === 'test') {
+    dbPath = path.resolve(__dirname, './reddit/data/db.sqlite');
+  }
 
   const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE, (err) => {
     if (err) {
