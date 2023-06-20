@@ -67,7 +67,7 @@ export function filterRawPosts(
   } else {
     logger(
       LogContext.Info,
-      `No valid posts found in the subreddit. Here is the breakdown:
+      `No valid posts found in the subreddit ${rawPosts[0].data.subreddit}. Here is the breakdown:
 * ${stickiedOrRemoved} were stickied or removed
 * ${noLink} had no link
 * ${tooOld} were too old (max hours: ${maxTimeHours})

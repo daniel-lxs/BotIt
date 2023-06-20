@@ -18,5 +18,6 @@ export interface RawPost {
     //For now
     media_embed: any;
     created_utc: number;
+    subreddit: string;
   };
 }
