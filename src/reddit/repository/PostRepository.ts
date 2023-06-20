@@ -11,17 +11,23 @@ export class PostRepository {
   savePost(post: Post): Promise<void> {
     return new Promise((resolve, reject) => {
       const stmt = this.db.prepare(`
-        INSERT INTO post (title, content, url)
-        VALUES (?, ?, ?)
+        INSERT INTO post (title, content, url, communityName)
+        VALUES (?, ?, ?, ?)
       `);
 
-      stmt.run(post.title, post.content, post.url, (err: Error | null) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve();
+      stmt.run(
+        post.title,
+        post.content,
+        post.url,
+        post.communityName,
+        (err: Error | null) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve();
+          }
         }
-      });
+      );
 
       stmt.finalize();
     });
