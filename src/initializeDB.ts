@@ -32,12 +32,12 @@ function initializeDB() {
 
     db.run(`
       CREATE TABLE IF NOT EXISTS post (
-        id TEXT PRIMARY KEY,
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT,
         content TEXT,
         url TEXT,
         communityName TEXT
-      )
+      );
     `);
   });
 }
