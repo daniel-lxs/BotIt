@@ -33,15 +33,19 @@ export class PostRepository {
     });
   }
 
-  getPostByUrl(url: string): Promise<Post | null> {
+  getPostByUrl(url: string, communityName: string): Promise<Post | null> {
     return new Promise((resolve, reject) => {
-      this.db.get('SELECT * FROM post WHERE url = ?', url, (err, row) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(row as Post | null);
+      this.db.get(
+        'SELECT * FROM post WHERE url = ? AND communityName = ?',
+        [url, communityName],
+        (err, row) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(row as Post | null);
+          }
         }
-      });
+      );
     });
   }
 }
