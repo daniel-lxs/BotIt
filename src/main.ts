@@ -1,5 +1,4 @@
 import { LemmyHttp } from 'lemmy-js-client';
-
 import { scrapeSubreddit, CacheRepository, parseRawPosts } from './reddit';
 import { CommunityMapEntry, Config } from './model/Config';
 import {
@@ -10,12 +9,14 @@ import {
   parseRawPostsToUrls,
 } from './lemmy';
 import { logger, LogContext } from './logger';
+import { PostRepository } from './reddit/repository/PostRepository';
 
 export async function start(
   lemmyClient: LemmyHttp,
   config: Config,
   jwt: string,
-  cacheRepository: CacheRepository
+  cacheRepository: CacheRepository,
+  postRepository: PostRepository
 ) {
   try {
     const communityMap: CommunityMapEntry[] = config.communityMap;
@@ -57,6 +58,17 @@ export async function start(
       let newUrlFound = false;
       while (!newUrlFound && i < posts.length) {
         if (!communityUrls.includes(posts[i].url)) {
+          // Check if the post already exists using getPostByUrl
+          const existingPost = await postRepository.getPostByUrl(posts[i].url);
+          if (existingPost) {
+            logger(
+              LogContext.Info,
+              `Post with URL ${posts[i].url} already exists on db. Skipping...`
+            );
+            i++;
+            continue;
+          }
+
           logger(
             LogContext.Info,
             `Found a reddit post from subreddit ${subreddit} to crosspost to ${communityName}!`
@@ -88,7 +100,7 @@ export async function start(
       );
 
       if (!postUrl) {
-        logger(LogContext.Info, 'Post url unavailable');
+        logger(LogContext.Error, 'Post url unavailable');
         continue;
       }
 
@@ -96,6 +108,9 @@ export async function start(
         LogContext.Info,
         `Successfully posted to ${communityName}: ${postUrl}`
       );
+
+      // Save the posted post using the PostRepository
+      await postRepository.savePost(posts[i]);
     }
   } catch (error) {
     logger(LogContext.Error, 'Process terminated: ' + error);
