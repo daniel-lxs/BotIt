@@ -60,7 +60,7 @@ export async function start(
         if (!communityUrls.includes(posts[i].url)) {
           // Check if the post already exists using getPostByUrl
           const existingPost = await postRepository.getPostByUrl(posts[i].url);
-          if (existingPost) {
+          if (existingPost && existingPost.communityName === communityName) {
             logger(
               LogContext.Info,
               `Post with URL ${posts[i].url} already exists on db. Skipping...`
@@ -110,7 +110,7 @@ export async function start(
       );
 
       // Save the posted post using the PostRepository
-      await postRepository.savePost(posts[i]);
+      await postRepository.savePost({ ...posts[i], communityName });
     }
   } catch (error) {
     logger(LogContext.Error, 'Process terminated: ' + error);

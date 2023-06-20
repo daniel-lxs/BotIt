@@ -35,7 +35,8 @@ function initializeDB() {
         id TEXT PRIMARY KEY,
         title TEXT,
         content TEXT,
-        url TEXT UNIQUE
+        url TEXT,
+        communityName TEXT
       )
     `);
   });
