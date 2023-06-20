@@ -1,66 +1,30 @@
 import sqlite3 from 'sqlite3';
-import path from 'path';
-import fs from 'fs';
-import { LogContext, LogDomain, logger } from '../../logger';
-
-const dbDir = path.resolve(__dirname, '../data');
-const dbPath = path.resolve(__dirname, '../data/cache.sqlite');
-
-if (!fs.existsSync(dbDir)) {
-  fs.mkdirSync(dbDir, { recursive: true });
-}
-
-if (!fs.existsSync(dbPath)) {
-  fs.writeFileSync(dbPath, ''); // Creates an empty file
-}
-
-const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE, (err) => {
-  if (err) {
-    logger(
-      LogContext.Error,
-      `Error connecting to local db: ${err}`,
-      LogDomain.Reddit
-    );
-  }
-});
 
 export class CacheRepository {
-  constructor() {
-    this.initializeCacheTable();
-  }
+  private readonly db: sqlite3.Database;
 
-  private initializeCacheTable(): void {
-    db.serialize(() => {
-      db.run(
-        `
-        CREATE TABLE IF NOT EXISTS subreddit_cache (
-          subreddit TEXT PRIMARY KEY,
-          timestamp INTEGER,
-          posts TEXT
-        )
-      `
-      );
-    });
+  constructor(db: sqlite3.Database) {
+    this.db = db;
   }
 
   public async saveCache(subreddit: string, posts: string): Promise<void> {
     const timestamp = Date.now();
 
     return new Promise<void>((resolve, reject) => {
-      db.run(
-        `
+      const stmt = this.db.prepare(`
         REPLACE INTO subreddit_cache (subreddit, timestamp, posts)
         VALUES (?, ?, ?)
-        `,
-        [subreddit, timestamp, posts],
-        (error) => {
-          if (error) {
-            reject(error);
-          } else {
-            resolve();
-          }
+      `);
+
+      stmt.run(subreddit, timestamp, posts, (error: Error | null) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve();
         }
-      );
+      });
+
+      stmt.finalize();
     });
   }
 
@@ -69,7 +33,7 @@ export class CacheRepository {
     expirationTime: number
   ): Promise<string | null> {
     return new Promise<string | null>((resolve, reject) => {
-      db.get(
+      this.db.get(
         `
         SELECT timestamp, posts FROM subreddit_cache
         WHERE subreddit = ?
@@ -102,12 +66,12 @@ export class CacheRepository {
   }
 
   private deleteCache(subreddit: string): void {
-    db.run(
-      `
+    const stmt = this.db.prepare(`
       DELETE FROM subreddit_cache
       WHERE subreddit = ?
-      `,
-      [subreddit]
-    );
+    `);
+
+    stmt.run(subreddit);
+    stmt.finalize();
   }
 }

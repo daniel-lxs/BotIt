@@ -2,6 +2,8 @@ import cron, { CronJob } from 'cron';
 import minimist, { ParsedArgs } from 'minimist';
 import * as fs from 'fs';
 import * as yaml from 'yaml';
+import path from 'path';
+import sqlite3 from 'sqlite3';
 
 import { start } from './main';
 import { Config } from './model/Config';
@@ -9,6 +11,7 @@ import { LemmyHttp } from 'lemmy-js-client';
 import { getJwt } from './lemmy/api/getJwt';
 import { CacheRepository } from './reddit/repository/CacheRepository';
 import { logger, LogContext, LogDomain } from './logger';
+import { PostRepository } from './reddit/repository/PostRepository';
 
 const dotenv = require('dotenv');
 dotenv.config();
@@ -38,7 +41,20 @@ async function runScheduler(): Promise<void> {
   const lemmyClient = new LemmyHttp(config.lemmy.baseUrl);
   let jwt = await getJwt(lemmyClient);
 
-  const cacheRepository = new CacheRepository();
+  const dbPath = path.resolve(__dirname, '../src/reddit/data/db.sqlite');
+
+  const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE, (err) => {
+    if (err) {
+      logger(
+        LogContext.Error,
+        `Error connecting to local db: ${err}`,
+        LogDomain.Scheduler
+      );
+    }
+  });
+
+  const cacheRepository = new CacheRepository(db);
+  const postRepository = new PostRepository(db);
 
   if (cronExpression) {
     const job = new CronJob({
@@ -49,7 +65,7 @@ async function runScheduler(): Promise<void> {
           'Running scheduled fetch...',
           LogDomain.Scheduler
         );
-        start(lemmyClient, config, jwt, cacheRepository);
+        start(lemmyClient, config, jwt, cacheRepository, postRepository);
       },
       start: false,
     });
@@ -63,7 +79,7 @@ async function runScheduler(): Promise<void> {
       'Cron expression not provided. Running fetch once...',
       LogDomain.Scheduler
     );
-    start(lemmyClient, config, jwt, cacheRepository);
+    start(lemmyClient, config, jwt, cacheRepository, postRepository);
   }
 }
 

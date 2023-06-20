@@ -1,11 +1,11 @@
 import sqlite3 from 'sqlite3';
 import path from 'path';
 import fs from 'fs';
-import { LogContext, LogDomain, logger } from './logger';
+import { LogContext, logger } from './logger';
 
 function initializeDB() {
   const dbDir = path.resolve(__dirname, './reddit/data');
-  const dbPath = path.resolve(__dirname, './reddit/data/cache.sqlite');
+  const dbPath = path.resolve(__dirname, './reddit/data/db.sqlite');
 
   if (!fs.existsSync(dbDir)) {
     fs.mkdirSync(dbDir, { recursive: true });
@@ -17,24 +17,27 @@ function initializeDB() {
 
   const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE, (err) => {
     if (err) {
-      logger(
-        LogContext.Error,
-        `Error connecting to local db: ${err}`,
-        LogDomain.Reddit
-      );
+      logger(LogContext.Error, `Error connecting to local db: ${err}`);
     }
   });
 
   db.serialize(() => {
-    db.run(
-      `
+    db.run(`
       CREATE TABLE IF NOT EXISTS subreddit_cache (
         subreddit TEXT PRIMARY KEY,
         timestamp INTEGER,
         posts TEXT
       )
-    `
-    );
+    `);
+
+    db.run(`
+      CREATE TABLE IF NOT EXISTS post (
+        id TEXT PRIMARY KEY,
+        title TEXT,
+        content TEXT,
+        url TEXT UNIQUE
+      )
+    `);
   });
 }
 
