@@ -12,7 +12,7 @@ export class PostRepository {
     return new Promise((resolve, reject) => {
       const stmt = this.db.prepare(`
         INSERT INTO post (title, content, url)
-        VALUES (?, ?, ?, ?)
+        VALUES (?, ?, ?)
       `);
 
       stmt.run(post.title, post.content, post.url, (err: Error | null) => {
