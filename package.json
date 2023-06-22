@@ -32,6 +32,7 @@
     "dotenv": "^16.3.1",
     "jsonwebtoken": "^9.0.0",
     "lemmy-js-client": "^0.18.0-rc.1",
+    "link-preview-js": "^3.0.4",
     "minimist": "^1.2.8",
     "sqlite3": "^5.1.6",
     "yaml": "^2.3.1"
