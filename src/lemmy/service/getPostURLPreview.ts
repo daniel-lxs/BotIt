@@ -13,10 +13,6 @@ export async function getPostURLPreview(post: Post): Promise<Post> {
     const response = await getLinkPreview(post.url, { headers });
     const linkPreview = response as LinkPreview;
 
-    if (linkPreview.title) {
-      postDeepCopy.title = linkPreview.title;
-    }
-
     if (linkPreview.description) {
       postDeepCopy.content = linkPreview.description;
     }
