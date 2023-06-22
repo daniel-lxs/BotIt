@@ -6,3 +6,5 @@ export * from './model/PostFilter';
 export * from './model/RawPost';
 export * from './model/RawSubreddit';
 export * from './repository/CacheRepository';
+export * from './repository/PostRepository';
+export * from './service/getSubredditPosts';
