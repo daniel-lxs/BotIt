@@ -1,15 +1,13 @@
 import { LemmyHttp } from 'lemmy-js-client';
-import { scrapeSubreddit, CacheRepository, parseRawPosts } from './reddit';
-import { CommunityMapEntry, Config } from './model/Config';
 import {
-  getJwt,
-  createPost,
-  getCommunityId,
-  getCommunityPosts,
-  parseRawPostsToUrls,
-} from './lemmy';
+  CacheRepository,
+  PostRepository,
+  getSubredditPosts,
+} from './reddit';
 import { logger, LogContext } from './logger';
-import { PostRepository } from './reddit/repository/PostRepository';
+import { crosspostToCommunity } from './lemmy';
+import { CommunityMapEntry, Config } from './model/Config';
+import { CrosspostData } from './model/CrosspostData';
 
 export async function start(
   lemmyClient: LemmyHttp,
@@ -21,99 +19,24 @@ export async function start(
   try {
     const communityMap: CommunityMapEntry[] = config.communityMap;
 
-    const subredditPromises = [];
+    const crosspostDataList: CrosspostData[] = [];
     for (const communityEntry of communityMap) {
-      const subreddit = communityEntry.subreddit;
-      const communityName = communityEntry.community;
-
-      logger(LogContext.Info, `Scraping posts from subreddit: ${subreddit}`);
-      const rawPosts = await scrapeSubreddit(
-        config.reddit.baseUrl,
+      const crosspostData = await getSubredditPosts(
+        config,
         communityEntry,
         cacheRepository
       );
-      const parsedPosts = parseRawPosts(rawPosts);
-
-      subredditPromises.push({ subreddit, communityName, posts: parsedPosts });
+      crosspostDataList.push(crosspostData);
     }
 
-    const communityDataList = await Promise.all(subredditPromises);
-
-    for (const communityData of communityDataList) {
-      const { subreddit, communityName, posts } = communityData;
-      const communityId = await getCommunityId(
+    for (const crosspostData of crosspostDataList) {
+      await crosspostToCommunity(
         lemmyClient,
-        await getJwt(lemmyClient, jwt),
-        communityName
+        jwt,
+        crosspostData,
+        config,
+        postRepository
       );
-      const communityPosts = await getCommunityPosts(
-        lemmyClient,
-        await getJwt(lemmyClient, jwt),
-        communityId,
-        config.lemmy.postLimit
-      );
-      const communityUrls = parseRawPostsToUrls(communityPosts);
-
-      let i = 0;
-      let newUrlFound = false;
-      while (!newUrlFound && i < posts.length) {
-        if (!communityUrls.includes(posts[i].url)) {
-          // Check if the post already exists using getPostByUrl
-          const existingPost = await postRepository.getPostByUrl(
-            posts[i].url,
-            communityName
-          );
-          if (existingPost) {
-            logger(
-              LogContext.Info,
-              `Post with URL ${posts[i].url} already exists on db. Skipping...`
-            );
-            i++;
-            continue;
-          }
-
-          logger(
-            LogContext.Info,
-            `Found a reddit post from subreddit ${subreddit} to crosspost to ${communityName}!`
-          );
-          newUrlFound = true;
-          break;
-        } else {
-          logger(
-            LogContext.Info,
-            `Skipping already posted url: ${posts[i].url}`
-          );
-        }
-        i++;
-      }
-
-      if (!newUrlFound) {
-        logger(
-          LogContext.Info,
-          `There aren't any new posts from subreddit ${subreddit} to crosspost to ${communityName}.`
-        );
-        continue;
-      }
-
-      const postUrl = await createPost(
-        lemmyClient,
-        await getJwt(lemmyClient, jwt),
-        communityId,
-        posts[i]
-      );
-
-      if (!postUrl) {
-        logger(LogContext.Error, 'Post url unavailable');
-        continue;
-      }
-
-      logger(
-        LogContext.Info,
-        `Successfully posted to ${communityName}: ${postUrl}`
-      );
-
-      // Save the posted post using the PostRepository
-      await postRepository.savePost({ ...posts[i], communityName });
     }
   } catch (error) {
     logger(LogContext.Error, 'Process terminated: ' + error);

@@ -14,6 +14,8 @@ export async function scrapeSubreddit(
   logger(LogContext.Info, 'Getting posts...', LogDomain.Reddit);
 
   try {
+    const userAgent = process.env.USER_AGENT || 'google-bot';
+
     let rawPosts: RawPost[] = [];
     // Check if the subreddit is already in the cache
     const cachedData = await cacheRepository.getCache(subreddit, 10000);
@@ -25,7 +27,9 @@ export async function scrapeSubreddit(
       );
       rawPosts = JSON.parse(cachedData);
     } else {
-      const response = await axios.get(`${baseUrl}/r/${subreddit}/hot.json`);
+      const response = await axios.get(`${baseUrl}/r/${subreddit}/hot.json`, {
+        headers: { 'User-Agent': userAgent },
+      });
 
       rawPosts = response.data.data.children.sort(
         (a: any, b: any) => b.data.ups - a.data.ups
