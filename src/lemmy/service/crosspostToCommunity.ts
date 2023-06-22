@@ -87,7 +87,7 @@ export async function crosspostToCommunity(
 
   logger(LogContext.Warning, JSON.stringify(postWithPreview), LogDomain.Lemmy);
 
-  /*const postUrl = await createPost(
+  const postUrl = await createPost(
     lemmyClient,
     await getJwt(lemmyClient, jwt),
     communityId,
@@ -106,5 +106,5 @@ export async function crosspostToCommunity(
   );
 
   // Save the posted post using the PostRepository
-  await postRepository.savePost({ ...posts[i], communityName });*/
+  await postRepository.savePost({ ...posts[i], communityName });
 }
