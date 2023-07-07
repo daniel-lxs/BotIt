@@ -43,6 +43,11 @@ communityMap:
       maxDownvotes: 300  # Sets the maximum number of downvotes a post can have to be included.
       minUpvoteRatio: 0.75  # Defines the minimum ratio of upvotes to total votes a post must have to be included.
       maxTimeHours: 6  # Specifies the maximum age (in hours) of a post to be included.
+      excludedUrlPatterns: # User defined regular expresions to exclude urls.
+        - \.redd\.it$
+        - reddit\.com
+        - i\.redd.it\/\w+
+        - v\.redd.it\/\w+
     community: world@lemmy.world
 
   - subreddit: worldnews
@@ -52,6 +57,11 @@ communityMap:
       maxDownvotes: 300
       minUpvoteRatio: 0.75
       maxTimeHours: 5
+      excludedUrlPatterns:
+        - \.redd\.it$
+        - reddit\.com
+        - i\.redd.it\/\w+
+        - v\.redd.it\/\w+
     community: worldnews@lemmy.ml
 ```
 

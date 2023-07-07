@@ -5,7 +5,13 @@ import { logger, LogContext, LogDomain } from '../../logger';
 
 export function filterRawPosts(
   rawPosts: RawPost[],
-  { minUpvotes, maxDownvotes, minUpvoteRatio, maxTimeHours }: PostFilter
+  {
+    minUpvotes,
+    maxDownvotes,
+    minUpvoteRatio,
+    maxTimeHours,
+    excludedUrlPatterns,
+  }: PostFilter
 ) {
   let stickiedOrRemoved = 0;
   let notEnoughUpvotes = 0;
@@ -13,6 +19,25 @@ export function filterRawPosts(
   let badUpvoteRatio = 0;
   let tooOld = 0;
   let noLink = 0;
+  let excluded = 0;
+
+  // Convert excludedUrlPatterns to an array of regular expressions
+  const regexPatterns: RegExp[] = [];
+  if (excludedUrlPatterns) {
+    for (const pattern of excludedUrlPatterns) {
+      try {
+        const regex = new RegExp(pattern);
+        regexPatterns.push(regex);
+      } catch (error) {
+        // Handle the error (e.g., log or ignore)
+        logger(
+          LogContext.Error,
+          `Invalid regular expression pattern: ${pattern}`,
+          LogDomain.Reddit
+        );
+      }
+    }
+  }
 
   const filteredPosts = rawPosts.filter((rawPost) => {
     if (rawPost.data.stickied || rawPost.data.removal_reason) {
@@ -40,11 +65,17 @@ export function filterRawPosts(
       return false;
     }
 
-    if (
-      !rawPost.data.url_overridden_by_dest ||
-      rawPost.data.url_overridden_by_dest.includes('redd.it')
-    ) {
+    if (!rawPost.data.url_overridden_by_dest) {
       noLink++;
+      return false;
+    }
+
+    if (
+      regexPatterns.some((regex) => {
+        return regex.test(rawPost.data.url_overridden_by_dest);
+      })
+    ) {
+      excluded++;
       return false;
     }
 
@@ -70,6 +101,7 @@ export function filterRawPosts(
       `No valid posts found in the subreddit ${rawPosts[0].data.subreddit}. Here is the breakdown:
 * ${stickiedOrRemoved} were stickied or removed
 * ${noLink} had no link
+* ${excluded} were exluded by regex
 * ${tooOld} were too old (max hours: ${maxTimeHours})
 * ${notEnoughUpvotes} didn't have enough upvotes (min: ${minUpvotes})
 * ${tooManyDownVotes} had too many downvotes (max: ${maxDownvotes})

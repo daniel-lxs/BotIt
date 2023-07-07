@@ -4,4 +4,5 @@ export interface PostFilter {
   minUpvoteRatio?: number;
   maxTimeHours?: number;
   postLimit?: number;
+  excludedUrlPatterns?: string[];
 }
