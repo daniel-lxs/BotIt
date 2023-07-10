@@ -9,7 +9,7 @@ export async function getSubredditPosts(
   cacheRepository: CacheRepository
 ): Promise<CrosspostData> {
   const subreddit = communityEntry.subreddit;
-  const communityName = communityEntry.community;
+  const communityName = communityEntry.community.name;
 
   logger(
     LogContext.Info,
