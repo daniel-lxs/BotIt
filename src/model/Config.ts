@@ -18,5 +18,10 @@ export interface LemmyConfig {
 export interface CommunityMapEntry {
   subreddit: string;
   postFilter?: PostFilter;
-  community: string;
+  community: CommunityConfig;
+}
+
+export interface CommunityConfig {
+  name: string;
+  postIfQuietFor?: number;
 }
