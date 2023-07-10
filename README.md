@@ -36,7 +36,7 @@ lemmy:
   baseUrl: https://lemmy.world  # The base URL for accessing the Lemmy website.
 
 communityMap:
-  - subreddit: worldnews
+  - subreddit: exampleSubreddit
     postFilter:
       postLimit: 75  # Limits the number of posts to retrieve from the subreddit.
       minUpvotes: 800  # Sets the minimum number of upvotes a post must have to be included.
@@ -48,9 +48,11 @@ communityMap:
         - reddit\.com
         - i\.redd.it\/\w+
         - v\.redd.it\/\w+
-    community: world@lemmy.world
+    community:
+      name: BotIt@kbin.social
+      postIfQuietFor: 5 # Posting will be skipped if a post is newer than this amount of hours
 
-  - subreddit: worldnews
+  - subreddit: exampleSubreddit
     postFilter:
       postLimit: 75
       minUpvotes: 800
@@ -62,7 +64,9 @@ communityMap:
         - reddit\.com
         - i\.redd.it\/\w+
         - v\.redd.it\/\w+
-    community: worldnews@lemmy.ml
+    community:       
+      name: BotIt@kbin.social
+      postIfQuietFor: 5
 ```
 
 Additionally, set up the following environment variables by copying the provided `.env.template` file and renaming it to `.env`. Update the values in the `.env` file according to your Lemmy account:
